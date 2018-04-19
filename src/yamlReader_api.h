@@ -1,6 +1,9 @@
 #ifndef YAMLREADER_API_H
 #define YAMLREADER_API_H
 
+#include <string>
+#include <inttypes.h>
+#include <stdexcept>
 #include <boost/shared_ptr.hpp>
 
 class IYamlReader;
