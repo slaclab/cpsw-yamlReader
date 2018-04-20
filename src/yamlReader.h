@@ -30,8 +30,6 @@ public:
     virtual void           readTarball();
     virtual void           untar( const bool stripRootDir = false ) const;
 
-    // static YamlReader create( const std::string& ipAddr );
-
 private:
     std::string dirName;
     std::string fileName;
