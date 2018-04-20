@@ -95,83 +95,76 @@ int main (int argc, char **argv)
     // Read tarball from PROM
     tr->readTarball();
 
-    if ( tr->wasValid() )
+    printf( "A valid tarball was found:\n" );
+    printf( "   Start address     : 0x%08X\n",   tr->getStartAddress() );
+    printf( "   End address       : 0x%08X\n",   tr->getEndAddress()   );
+    printf( "   Tarball file size : %d bytes\n", tr->getTarballSize()  );
+
+    printf(  "\n" );
+    printf( "The tarball was written to %s.\n",   outDir.c_str() );
+
+    if ( untar )
     {
-        printf( "A valid tarball was found:\n" );
-        printf( "   Start address     : 0x%08X\n",   tr->getStartAddress() );
-        printf( "   End address       : 0x%08X\n",   tr->getEndAddress()   );
-        printf( "   Tarball file size : %d bytes\n", tr->getTarballSize()  );
+        // Untar tarball
+        tr->untar( strip );
 
         printf(  "\n" );
-        printf( "The tarball was written to %s.\n",   outDir.c_str() );
+        printf( "The tarball was ungziped and untared.\n" );
 
-        if ( untar )
+        if ( strip && readVer )
         {
-            // Untar tarball
-            tr->untar( strip );
-
             printf(  "\n" );
-            printf( "The tarball was ungziped and untared.\n" );
-
-            if ( strip && readVer )
+            printf( "Reading firmware version information...\n" );
+            try
             {
-                printf(  "\n" );
-                printf( "Reading firmware version information...\n" );
-                try
-                {
-                    std::string topYaml = outDir + "/000TopLevel.yaml";
-                    IYamlSetIP setIP(ipAddr);
-                    Path root = IPath::loadYamlFile( topYaml.c_str(), "NetIODev", NULL, &setIP );
+                std::string topYaml = outDir + "/000TopLevel.yaml";
+                IYamlSetIP setIP(ipAddr);
+                Path root = IPath::loadYamlFile( topYaml.c_str(), "NetIODev", NULL, &setIP );
 
-                    ScalVal_RO fpgaVers    = IScalVal_RO::create (root->findByName("/mmio/AmcCarrierCore/AxiVersion/FpgaVersion"));
-                    ScalVal_RO bldStamp    = IScalVal_RO::create (root->findByName("/mmio/AmcCarrierCore/AxiVersion/BuildStamp"));
-                    ScalVal_RO gitHash     = IScalVal_RO::create (root->findByName("/mmio/AmcCarrierCore/AxiVersion/GitHash"));
-                    ScalVal_RO upTimeCnt   = IScalVal_RO::create (root->findByName("/mmio/AmcCarrierCore/AxiVersion/UpTimeCnt"));
-                    ScalVal_RO deviceId    = IScalVal_RO::create (root->findByName("/mmio/AmcCarrierCore/AxiVersion/DeviceId"));
-                    ScalVal_RO fdSerail    = IScalVal_RO::create (root->findByName("/mmio/AmcCarrierCore/AxiVersion/FdSerial"));
+                ScalVal_RO fpgaVers    = IScalVal_RO::create (root->findByName("/mmio/AmcCarrierCore/AxiVersion/FpgaVersion"));
+                ScalVal_RO bldStamp    = IScalVal_RO::create (root->findByName("/mmio/AmcCarrierCore/AxiVersion/BuildStamp"));
+                ScalVal_RO gitHash     = IScalVal_RO::create (root->findByName("/mmio/AmcCarrierCore/AxiVersion/GitHash"));
+                ScalVal_RO upTimeCnt   = IScalVal_RO::create (root->findByName("/mmio/AmcCarrierCore/AxiVersion/UpTimeCnt"));
+                ScalVal_RO deviceId    = IScalVal_RO::create (root->findByName("/mmio/AmcCarrierCore/AxiVersion/DeviceId"));
+                ScalVal_RO fdSerail    = IScalVal_RO::create (root->findByName("/mmio/AmcCarrierCore/AxiVersion/FdSerial"));
 
-                    printf("\n");
-                    printf("FW Version information:\n");
-                    printf("=======================\n");
+                printf("\n");
+                printf("FW Version information:\n");
+                printf("=======================\n");
 
-                    uint8_t  str[256];
-                    bldStamp->getVal( str, sizeof( str )/sizeof( str[0] ) );
-                    printf( "Build String : %s\n", (char*)str );
+                uint8_t  str[256];
+                bldStamp->getVal( str, sizeof( str )/sizeof( str[0] ) );
+                printf( "Build String : %s\n", (char*)str );
 
-                    uint8_t  hash[20];
-                    gitHash->getVal( hash, sizeof( hash )/sizeof( hash[0] ) );
-                    printf( "Git Hash     : 0x" );
-                    for ( int i = 0; i < 20; i++ )
-                        printf( "%02X", hash[i] );
-                    printf( "\n" );
+                uint8_t  hash[20];
+                gitHash->getVal( hash, sizeof( hash )/sizeof( hash[0] ) );
+                printf( "Git Hash     : 0x" );
+                for ( int i = 0; i < 20; i++ )
+                    printf( "%02X", hash[i] );
+                printf( "\n" );
 
-                    uint32_t u32;
-                    upTimeCnt->getVal(&u32);
-                    printf( "UpTimerCnt   : %08" PRIu32 " s\n", u32 );
+                uint32_t u32;
+                upTimeCnt->getVal(&u32);
+                printf( "UpTimerCnt   : %08" PRIu32 " s\n", u32 );
 
-                    fpgaVers->getVal(&u32);
-                    printf( "FpgaVersion  : 0x%08" PRIx32 "\n", u32 );
+                fpgaVers->getVal(&u32);
+                printf( "FpgaVersion  : 0x%08" PRIx32 "\n", u32 );
 
-                    deviceId->getVal(&u32);
-                    printf( "DeviceId     : 0x%08" PRIx32 "\n", u32 );
+                deviceId->getVal(&u32);
+                printf( "DeviceId     : 0x%08" PRIx32 "\n", u32 );
 
-                    uint64_t u64;
-                    fdSerail->getVal(&u64);
-                    printf( "FdSerial     : 0x%016" PRIx64 "\n", u64 );
+                uint64_t u64;
+                fdSerail->getVal(&u64);
+                printf( "FdSerial     : 0x%016" PRIx64 "\n", u64 );
 
-                }
-                catch (CPSWError &e)
-                {
-                    fprintf( stderr, "CPSW Error: %s\n", e.getInfo().c_str() );
-                }
+            }
+            catch (CPSWError &e)
+            {
+                fprintf( stderr, "CPSW Error: %s\n", e.getInfo().c_str() );
             }
         }
     }
-    else
-    {
-        fprintf(  stderr, "Not valid tarball was found.\n" );
-        return 1;
-    }
+
 
     return 0;
 }

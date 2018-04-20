@@ -16,7 +16,6 @@ public:
     virtual const uint32_t getStartAddress()                        const = 0;
     virtual const uint32_t getEndAddress()                          const = 0;
     virtual const uint32_t getTarballSize()                         const = 0;
-    virtual const bool     wasValid()                               const = 0;
     virtual void           setOutputDir( const std::string& dir )         = 0;
     virtual void           setFileName(  const std::string& name )        = 0;
     virtual void           readTarball()                                  = 0;

@@ -23,7 +23,6 @@ public:
     virtual const uint32_t getStartAddress() const { return startAddress;                };
     virtual const uint32_t getEndAddress()   const { return endAddress;                  };
     virtual const uint32_t getTarballSize()  const { return (endAddress - startAddress); };
-    virtual const bool     wasValid()        const { return gotValidTarball; };
 
     virtual void           setOutputDir( const std::string& dir );
     virtual void           setFileName(  const std::string& name );
@@ -40,7 +39,6 @@ private:
     EEProm      prom;
     uint32_t    startAddress;
     uint32_t    endAddress;
-    bool        gotValidTarball;
 };
 
 #endif

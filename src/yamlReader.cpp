@@ -23,8 +23,7 @@ IYamlReaderImpl::IYamlReaderImpl( const std::string& ipAddr )
 :
     dirName( "." ),
     fileName( "yaml.tar.gz" ),
-    outputFile( dirName + "/" + fileName ),
-    gotValidTarball( false )
+    outputFile( dirName + "/" + fileName )
 {
     try
     {
@@ -87,7 +86,6 @@ void IYamlReaderImpl::readTarball()
                 {
                     endAddress = addr;
                     file.put( 0 );
-                    gotValidTarball = true;
                     return;
                 }
 
