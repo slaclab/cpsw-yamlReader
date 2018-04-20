@@ -32,6 +32,8 @@ IYamlReaderImpl::IYamlReaderImpl( const std::string& ipAddr )
         prom                   = IEEProm::create( root->findByName( "mmio/prom" ) );
 
         tarballAddr->getVal(&startAddress);
+
+        printf( "Tarball start address found: 0x%08X\n", startAddress );
     }
     catch (CPSWError e)
     {
