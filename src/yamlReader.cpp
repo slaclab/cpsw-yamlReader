@@ -28,7 +28,7 @@ IYamlReaderImpl::IYamlReaderImpl( const std::string& ipAddr )
 {
     try
     {
-        Hub root               = buildHier(ipAddr.c_str());
+        Hub root               = buildHier( ipAddr.c_str() );
         ScalVal_RO tarballAddr = IScalVal_RO::create( root->findByName( "mmio/CPSW_TARBALL_ADDR_C" ) );
         prom                   = IEEProm::create( root->findByName( "mmio/prom" ) );
 
@@ -36,7 +36,8 @@ IYamlReaderImpl::IYamlReaderImpl( const std::string& ipAddr )
     }
     catch (CPSWError e)
     {
-        throw std::runtime_error( std::string( "CPSW Error: " + e.getInfo() ).c_str() );
+        fprintf( stderr, "CPSW Error during YamlReader object construction: %s\n",  e.getInfo().c_str() );
+        throw;
     }
 }
 
@@ -75,10 +76,8 @@ void IYamlReaderImpl::readTarball()
                 uint16_t header = ( (data[0] >> 16) & 0xffff );
 
                 if ( header != 0x1f8b )
-                {
-                    fprintf( stderr, "Invalid GZIP header read: 0x%X. Aborting...\n", header );
-                    return;
-                }
+                    throw std::runtime_error( "Invalid GZIP header. Aborting." );
+
                 first_loop = false;
             }
 
@@ -102,7 +101,7 @@ void IYamlReaderImpl::readTarball()
     }
     catch ( CPSWError e )
     {
-        fprintf( stderr,"CPSW Error while reading PROM: %s\n", e.getInfo().c_str() );
+        fprintf( stderr,"CPSW Error during PROM reading: %s\n", e.getInfo().c_str() );
         throw;
     }
 }
