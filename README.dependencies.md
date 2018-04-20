@@ -1,4 +1,6 @@
-# Driver dependencies
+# yamlReader for the SLAC High Performance System
+
+## Driver dependencies
 
 This driver depends on the following external packages:
 - CPSW, framework

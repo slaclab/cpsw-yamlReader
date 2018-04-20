@@ -2,7 +2,7 @@
 
 ## Description
 
-Driver fot reading the YAML file stored in the FPGA's PROM of the ATCA High Performance System (HPS).
+Driver for reading the YAML file stored in the FPGA's PROM of the ATCA High Performance System (HPS).
 
 ## Documentation
 
@@ -12,3 +12,4 @@ File                          | Description
 ------------------------------|---------------
 README.dependencies.md        | Which external packages are needed by this driver.
 README.buildroot.md           | How to cross compile agains different buildroot versions.
+README.howToUse.md            | How to use the library.

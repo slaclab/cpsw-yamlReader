@@ -1,5 +1,9 @@
-# Driver buildroot cross-compilation
+# yamlReader for the SLAC High Performance System
 
-This driver is crosscompiled agains the buildroot versions listed in the variable **BR_ARCHES**, which is defined in the file **config.mak**.
+## Driver buildroot cross-compilation
 
-The driver is compile also for the host architecture, which is defined in the **HARCH** in the same file.
+This driver is crosscompiled against the buildroot versions listed in the variable **BR_ARCHES**,
+which is defined in the file **config.mak**.
+
+The driver is compile also for the host architecture, which is defined in the **HARCH** in the
+same file.
