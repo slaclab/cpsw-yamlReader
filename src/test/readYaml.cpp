@@ -95,21 +95,11 @@ int main (int argc, char **argv)
     // Read tarball from PROM
     tr->readTarball();
 
-    printf( "A valid tarball was found:\n" );
-    printf( "   Start address     : 0x%08X\n",   tr->getStartAddress() );
-    printf( "   End address       : 0x%08X\n",   tr->getEndAddress()   );
-    printf( "   Tarball file size : %d bytes\n", tr->getTarballSize()  );
-
-    printf(  "\n" );
-    printf( "The tarball was written to %s.\n",   outDir.c_str() );
-
     if ( untar )
     {
         // Untar tarball
         tr->untar( strip );
 
-        printf(  "\n" );
-        printf( "The tarball was ungziped and untared.\n" );
 
         if ( strip && readVer )
         {

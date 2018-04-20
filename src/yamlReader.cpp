@@ -60,6 +60,7 @@ void IYamlReaderImpl::readTarball()
     bool     first_loop = true;
     uint32_t addr       = startAddress;
 
+    printf( "Starting reading of the tarball file from the PROM...\n" );
     try
     {
         // Setup for 32-bit address mode
@@ -86,6 +87,12 @@ void IYamlReaderImpl::readTarball()
                 {
                     endAddress = addr;
                     file.put( 0 );
+
+                    printf( "A valid tarball was found:\n" );
+                    printf( "   Start address     : 0x%08X\n",   startAddress );
+                    printf( "   End address       : 0x%08X\n",   endAddress   );
+                    printf( "   Tarball file size : %d bytes\n", endAddress - startAddress  );
+                    printf( "The tarball was written to %s\n",   outputFile.c_str() );
                     return;
                 }
 
@@ -111,7 +118,13 @@ void IYamlReaderImpl::untar( const bool stripRootDir ) const
     if ( stripRootDir )
         cmd += " --strip-components=1";
 
-   system( cmd.c_str() );
+    system( cmd.c_str() );
+
+    printf( "The tarball was ungziped and untared on %s\n",  dirName.c_str() );
+
+    if ( stripRootDir )
+        printf( "The root directory in the tarball was stripped\n" );
+
 }
 
 YamlReader IYamlReader::create( const std::string& ipAddr )
