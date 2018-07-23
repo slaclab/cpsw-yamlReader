@@ -58,7 +58,7 @@ void IYamlReaderImpl::readTarball()
 {
     RAIIFile file( outputFile, std::ios_base::out | std::ios_base::binary );
 
-    uint32_t data[mem_block_size];
+    uint32_t raw_data[mem_block_size];
     bool     first_loop = true;
     uint32_t addr       = startAddress;
 
@@ -70,12 +70,12 @@ void IYamlReaderImpl::readTarball()
 
         while( 1 )
         {
-            prom->readProm( addr, data );
+            prom->readProm( addr, raw_data );
 
             // On first loop, verify if it is a valid GZ file
             if ( first_loop )
             {
-                uint16_t header = ( (data[0] >> 16) & 0xffff );
+                uint16_t header = ( (raw_data[0] >> 16) & 0xffff );
 
                 if ( header != 0x1f8b )
                     throw std::runtime_error( "Invalid GZIP header. Aborting." );
@@ -85,7 +85,7 @@ void IYamlReaderImpl::readTarball()
 
             for ( int i = 0; i < mem_block_size; ++i )
             {
-                if ( data[i] == 0xffffffff )
+                if ( raw_data[i] == 0xffffffff )
                 {
                     endAddress = addr;
                     file.put( 0 );
@@ -98,10 +98,10 @@ void IYamlReaderImpl::readTarball()
                     return;
                 }
 
-                file.put( (data[i] >> 24) & 0xFF );
-                file.put( (data[i] >> 16) & 0xFF );
-                file.put( (data[i] >>  8) & 0xFF );
-                file.put( (data[i]) & 0xFF       );
+                file.put( (raw_data[i] >> 24) & 0xFF );
+                file.put( (raw_data[i] >> 16) & 0xFF );
+                file.put( (raw_data[i] >>  8) & 0xFF );
+                file.put( (raw_data[i]) & 0xFF       );
             }
             addr += byte_step_size;
         }
