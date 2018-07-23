@@ -83,7 +83,7 @@ void IYamlReaderImpl::readTarball()
                 first_loop = false;
             }
 
-            for ( int i = 0; i < 64; ++i )
+            for ( int i = 0; i < mem_block_size; ++i )
             {
                 if ( data[i] == 0xffffffff )
                 {
