@@ -103,7 +103,7 @@ void IYamlReaderImpl::readTarball()
                 file.put( (raw_data[i] >>  8) & 0xFF );
                 file.put( (raw_data[i]) & 0xFF       );
             }
-            addr += byte_step_size;
+            addr += mem_block_byte_size;
         }
     }
     catch ( CPSWError e )

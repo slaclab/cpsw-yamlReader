@@ -11,8 +11,9 @@
 #include <RAIIFile.h>
 #include <yamlReader_api.h>
 
-static const size_t mem_block_size  = 64;
-static const size_t byte_step_size  = mem_block_size*4;
+static const size_t mem_block_size      = 64;                             // Number of memory block
+static const size_t mem_byte_size       = 4;                              // Size in bytes of each memory location
+static const size_t mem_block_byte_size = mem_block_size * mem_byte_size; // Size in bytes of the memory
 
 class IYamlReaderImpl : public IYamlReader
 {
