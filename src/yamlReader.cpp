@@ -58,9 +58,9 @@ void IYamlReaderImpl::readTarball()
 {
     RAIIFile file( outputFile, std::ios_base::out | std::ios_base::binary );
 
-    uint32_t raw_data[mem_block_size];
-    bool     first_loop = true;
-    uint32_t addr       = startAddress;
+    std::vector<uint32_t> raw_data(mem_block_size, 0);
+    bool                  first_loop = true;
+    uint32_t              addr       = startAddress;
 
     printf( "Starting reading of the tarball file from the PROM...\n" );
     try
@@ -70,7 +70,7 @@ void IYamlReaderImpl::readTarball()
 
         while( 1 )
         {
-            prom->readProm( addr, raw_data );
+            prom->readProm( addr, raw_data.data() );
 
             // On first loop, verify if it is a valid GZ file
             if ( first_loop )
@@ -83,23 +83,22 @@ void IYamlReaderImpl::readTarball()
                 first_loop = false;
             }
 
-            for ( int i = 0; i < mem_block_size; ++i )
+            std::vector<uint32_t>::iterator it = std::find(raw_data.begin(), raw_data.end(), 0xffffffff);
+            for_each(raw_data.begin(), it, std::bind(&IYamlReaderImpl::copyWord, this, std::placeholders::_1, file.f() ));
+
+            if (it != raw_data.end())
             {
-                if ( raw_data[i] == 0xffffffff )
-                {
-                    endAddress = addr;
-                    file.put( 0 );
+                endAddress = addr;
+                file.put( 0 );
 
-                    printf( "A valid tarball was found:\n" );
-                    printf( "   Start address     : 0x%08X\n",   startAddress );
-                    printf( "   End address       : 0x%08X\n",   endAddress   );
-                    printf( "   Tarball file size : %d bytes\n", endAddress - startAddress  );
-                    printf( "The tarball was written to %s\n",   outputFile.c_str() );
-                    return;
-                }
-
-                copyWord( raw_data[i], file.f() );
+                printf( "A valid tarball was found:\n" );
+                printf( "   Start address     : 0x%08X\n",   startAddress );
+                printf( "   End address       : 0x%08X\n",   endAddress   );
+                printf( "   Tarball file size : %d bytes\n", endAddress - startAddress  );
+                printf( "The tarball was written to %s\n",   outputFile.c_str() );
+                return;
             }
+
             addr += mem_block_byte_size;
         }
     }
