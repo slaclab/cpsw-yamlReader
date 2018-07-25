@@ -40,7 +40,7 @@ private:
     uint32_t    startAddress;
     uint32_t    endAddress;
 
-    void copyWord( const uint32_t& u32, std::ofstream* file );
+    void copyWord( const uint32_t& u32, std::ofstream* file, bool trim_tail );
 };
 
 #endif

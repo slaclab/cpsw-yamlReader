@@ -58,13 +58,14 @@ void IYamlReaderImpl::readTarball()
 {
     RAIIFile file( outputFile, std::ios_base::out | std::ios_base::binary );
 
-    std::vector<uint32_t> raw_data(mem_block_size, 0);
-    bool                  first_loop = true;
-    uint32_t              addr       = startAddress;
-
     printf( "Starting reading of the tarball file from the PROM...\n" );
     try
     {
+        std::vector<uint32_t> raw_data(mem_block_size, 0);
+        bool                  first_loop = true;
+        uint32_t              addr       = startAddress;
+        uint32_t              tail_val;
+
         // Setup for 32-bit address mode
         prom->setAddr32BitMode( true );
 
@@ -75,31 +76,63 @@ void IYamlReaderImpl::readTarball()
             // On first loop, verify if it is a valid GZ file
             if ( first_loop )
             {
-                uint16_t header = ( (raw_data[0] >> 16) & 0xffff );
+                uint16_t header = ( (raw_data.at(0) >> 16) & 0xffff );
 
                 if ( header != 0x1f8b )
                     throw std::runtime_error( "Invalid GZIP header. Aborting." );
-
-                first_loop = false;
             }
 
+            // Look for the end of file in memrory, marked by the start of memory block set to 0xffffffff.
+            //
+            // The last valid word (the one right before the marker), could contain 0xff bytes in its tail
+            // which must be removed before writing the word to the output file.
+            //
+            // As the marker can be found at the begin of a memory block, we must keep the last word of a block
+            // until the next block is read; if the block start with the marker then this word was the last one
+            // of the file, and must be check for tailing 0xff bytes.
             std::vector<uint32_t>::iterator it = std::find(raw_data.begin(), raw_data.end(), 0xffffffff);
-            for_each(raw_data.begin(), it, std::bind(&IYamlReaderImpl::copyWord, this, std::placeholders::_1, file.f() ));
 
-            if (it != raw_data.end())
+
+            // Process the block if it does not start with the marker.
+            //
+            // The first memory block (when first_loop is true) can not be the marker as we at this point
+            // already check the GZ header in that location.
+            if (it != raw_data.begin())
             {
-                endAddress = addr;
-                file.put( 0 );
+                // At this point, the block does not start with the marker. So, copy the saved last word of the previous
+                // memory block to the oputput file. But, only after the first loop.
+                if ( ! first_loop )
+                    copyWord( tail_val, file.f(), false );
 
-                printf( "A valid tarball was found:\n" );
-                printf( "   Start address     : 0x%08X\n",   startAddress );
-                printf( "   End address       : 0x%08X\n",   endAddress   );
-                printf( "   Tarball file size : %d bytes\n", endAddress - startAddress  );
-                printf( "The tarball was written to %s\n",   outputFile.c_str() );
-                return;
+                // At this point we are done with the first loop, so we set this flag to  false, and it is never set
+                // to true again.
+                first_loop = false;
+
+                // Make a copy of the last word od the block, and copy all the rest the output file.
+                tail_val = *(it-1);
+                for_each(raw_data.begin(), it-1, std::bind(&IYamlReaderImpl::copyWord, this, std::placeholders::_1, file.f(), false ));
+
+                // If the marker was not found in this block, continue reading a new block.
+                if (it == raw_data.end())
+                {
+                    addr += mem_block_byte_size;
+                    continue;
+                }
             }
 
-            addr += mem_block_byte_size;
+            // We get here is the marker was found in the current memory block. Write the last word, removing
+            // trailing 0xff bytes, update the endAddress and return.
+
+            copyWord( tail_val, file.f(), true );
+
+            endAddress = addr;
+
+            printf( "A valid tarball was found:\n" );
+            printf( "   Start address     : 0x%08X\n",   startAddress );
+            printf( "   End address       : 0x%08X\n",   endAddress   );
+            printf( "   Tarball file size : %d bytes\n", endAddress - startAddress  );
+            printf( "The tarball was written to %s\n",   outputFile.c_str() );
+            return;
         }
     }
     catch ( CPSWError e )
@@ -125,11 +158,28 @@ void IYamlReaderImpl::untar( const bool stripRootDir ) const
 
 }
 
-
-void IYamlReaderImpl::copyWord( const uint32_t& u32, std::ofstream* file )
+void IYamlReaderImpl::copyWord( const uint32_t& u32, std::ofstream* file, bool trim_tail )
 {
     std::vector<uint8_t> u8(4,0);
     *(reinterpret_cast<uint32_t*>(u8.data())) = htobe32(u32);
+
+    if ( trim_tail )
+    {
+        for ( std::vector<uint8_t>::reverse_iterator it = u8.rbegin(); it != u8.rend(); ++it )
+        {
+            if (*it == 0xff)
+            {
+                *it = 0x00;
+            }
+            else
+            {
+                if (it == u8.rbegin())
+                    u8.push_back(0);
+                break;
+            }
+        }
+    }
+
     std::copy(u8.begin(), u8.end(), std::ostream_iterator<uint8_t>(*file));
 }
 
