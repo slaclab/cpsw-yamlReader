@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <cstdlib>
+#include <iterator>
 #include <boost/make_shared.hpp>
 #include <PromApiUser.h>
 #include <AxiMicronN25Q.h>
@@ -38,6 +39,8 @@ private:
     EEProm      prom;
     uint32_t    startAddress;
     uint32_t    endAddress;
+
+    void copyWord( const uint32_t& u32, std::ofstream* file );
 };
 
 #endif

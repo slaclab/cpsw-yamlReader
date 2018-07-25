@@ -98,10 +98,7 @@ void IYamlReaderImpl::readTarball()
                     return;
                 }
 
-                file.put( (raw_data[i] >> 24) & 0xFF );
-                file.put( (raw_data[i] >> 16) & 0xFF );
-                file.put( (raw_data[i] >>  8) & 0xFF );
-                file.put( (raw_data[i]) & 0xFF       );
+                copyWord( raw_data[i], file.f() );
             }
             addr += mem_block_byte_size;
         }
@@ -127,6 +124,14 @@ void IYamlReaderImpl::untar( const bool stripRootDir ) const
     if ( stripRootDir )
         printf( "The root directory in the tarball was stripped\n" );
 
+}
+
+
+void IYamlReaderImpl::copyWord( const uint32_t& u32, std::ofstream* file )
+{
+    std::vector<uint8_t> u8(4,0);
+    *(reinterpret_cast<uint32_t*>(u8.data())) = htobe32(u32);
+    std::copy(u8.begin(), u8.end(), std::ostream_iterator<uint8_t>(*file));
 }
 
 YamlReader IYamlReader::create( const std::string& ipAddr )
