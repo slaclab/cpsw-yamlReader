@@ -3,7 +3,7 @@
 Release notes for the yamlReader Driver.
 
 ## Releases:
-* __R1.0.3__: 2018-11-05 J. Vasquez
+* __R1.0.3__: 2019-02-06 J. Vasquez
   * Bug Fix: Update yaml-cpp to the correct verion 
     yaml-cpp-0.5.3_boost-1.64.0.
 
