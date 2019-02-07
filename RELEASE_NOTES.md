@@ -3,6 +3,10 @@
 Release notes for the yamlReader Driver.
 
 ## Releases:
+* __R1.0.3__: 2018-11-05 J. Vasquez
+  * Bug Fix: Update yaml-cpp to the correct verion 
+    yaml-cpp-0.5.3_boost-1.64.0.
+
 * __R1.0.2__: 2018-11-05 J. Vasquez
   * Update CPSW framework to R3.6.6 and boost to 1.64.0.
   * Update CPSW deviceLibrary to R1.0.1.
