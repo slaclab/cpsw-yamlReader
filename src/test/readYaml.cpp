@@ -24,7 +24,7 @@ class IYamlSetIP : public IYamlFixup
     public:
         IYamlSetIP( std::string addr ) : ipAddr( addr ) {}
 
-        void operator()(YAML::Node &node) { node["ipAddr"] = ipAddr.c_str(); };
+        void operator()(YAML::Node &root, YAML::Node &top) { root["ipAddr"] = ipAddr.c_str(); };
 
         ~IYamlSetIP() {}
 
