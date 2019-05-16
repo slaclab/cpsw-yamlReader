@@ -144,12 +144,17 @@ void IYamlReaderImpl::readTarball()
 
 void IYamlReaderImpl::untar( const bool stripRootDir ) const
 {
+int status;
+
     std::string cmd = "tar -zxf " + outputFile + " -C " + dirName;
 
     if ( stripRootDir )
         cmd += " --strip-components=1";
 
-    system( cmd.c_str() );
+    if ( (status = system( cmd.c_str() )) ) {
+		fprintf(stderr,"system(\"%s\") FAILED -- return status %i\n", cmd.c_str(), status);
+		exit( status );
+	}
 
     printf( "The tarball was ungziped and untared on %s\n",  dirName.c_str() );
 
