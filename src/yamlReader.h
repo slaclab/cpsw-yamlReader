@@ -30,7 +30,11 @@ public:
     virtual void           setFileName(  const std::string& name );
 
     virtual void           readTarball();
+	virtual void           readTarball(std::ostream *);
     virtual void           untar( const bool stripRootDir = false ) const;
+
+	// stream where to dump data -- is *not* closed by this library
+	virtual void           setOutputStream(std::ostream *);
 
 private:
     std::string dirName;
@@ -40,7 +44,9 @@ private:
     uint32_t    startAddress;
     uint32_t    endAddress;
 
-    void copyWord( const uint32_t& u32, std::ofstream* file, bool trim_tail );
+	std::ostream *ostream;
+
+    void copyWord( const uint32_t& u32, std::ostream* file, bool trim_tail );
 };
 
 #endif

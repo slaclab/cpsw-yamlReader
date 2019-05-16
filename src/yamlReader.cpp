@@ -1,4 +1,5 @@
 #include <yamlReader.h>
+#include <iostream>
 
 static Hub buildHier(const char *ip_addr)
 {
@@ -23,7 +24,8 @@ IYamlReaderImpl::IYamlReaderImpl( const std::string& ipAddr )
 :
     dirName( "." ),
     fileName( "yaml.tar.gz" ),
-    outputFile( dirName + "/" + fileName )
+    outputFile( dirName + "/" + fileName ),
+	ostream( NULL )
 {
     try
     {
@@ -51,13 +53,32 @@ void IYamlReaderImpl::setOutputDir( const std::string& dir )
 void IYamlReaderImpl::setFileName(  const std::string& name )
 {
     fileName = name;
-    outputFile = dirName + "/" + fileName;
+	if ( fileName.empty() ) {
+		outputFile.clear();
+		ostream = &std::cout;
+	} else {
+    	outputFile = dirName + "/" + fileName;
+		ostream = NULL;
+	}
+}
+
+void IYamlReaderImpl::setOutputStream( std::ostream *strm )
+{
+	ostream = strm;
 }
 
 void IYamlReaderImpl::readTarball()
 {
-    RAIIFile file( outputFile, std::ios_base::out | std::ios_base::binary );
+	if ( ostream ) {
+		readTarball( ostream );
+	} else {
+    	RAIIFile file( outputFile, std::ios_base::out | std::ios_base::binary );
+		readTarball( file.f() );
+	}
+}
 
+void IYamlReaderImpl::readTarball(std::ostream *fp)
+{
     printf( "Starting reading of the tarball file from the PROM...\n" );
     try
     {
@@ -102,7 +123,7 @@ void IYamlReaderImpl::readTarball()
                 // At this point, the block does not start with the marker. So, copy the saved last word of the previous
                 // memory block to the oputput file. But, only after the first loop.
                 if ( ! first_loop )
-                    copyWord( tail_val, file.f(), false );
+                    copyWord( tail_val, fp, false );
 
                 // At this point we are done with the first loop, so we set this flag to  false, and it is never set
                 // to true again.
@@ -110,7 +131,7 @@ void IYamlReaderImpl::readTarball()
 
                 // Make a copy of the last word od the block, and copy all the rest the output file.
                 tail_val = *(it-1);
-                for_each(raw_data.begin(), it-1, std::bind(&IYamlReaderImpl::copyWord, this, std::placeholders::_1, file.f(), false ));
+                for_each(raw_data.begin(), it-1, std::bind(&IYamlReaderImpl::copyWord, this, std::placeholders::_1, fp, false ));
 
                 // If the marker was not found in this block, continue reading a new block.
                 if (it == raw_data.end())
@@ -123,7 +144,7 @@ void IYamlReaderImpl::readTarball()
             // We get here is the marker was found in the current memory block. Write the last word, removing
             // trailing 0xff bytes, update the endAddress and return.
 
-            copyWord( tail_val, file.f(), true );
+            copyWord( tail_val, fp, true );
 
             endAddress = addr;
 
@@ -163,7 +184,7 @@ int status;
 
 }
 
-void IYamlReaderImpl::copyWord( const uint32_t& u32, std::ofstream* file, bool trim_tail )
+void IYamlReaderImpl::copyWord( const uint32_t& u32, std::ostream* file, bool trim_tail )
 {
     std::vector<uint8_t> u8(4,0);
     *(reinterpret_cast<uint32_t*>(u8.data())) = htobe32(u32);

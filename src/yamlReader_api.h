@@ -20,6 +20,7 @@ public:
     virtual void           setFileName(  const std::string& name )        = 0;
     virtual void           readTarball()                                  = 0;
     virtual void           untar( const bool stripRootDir = false ) const = 0;
+	virtual void           setOutputStream(std::ostream *)                = 0;
 
     static YamlReader create( const std::string& ipAddr );
 
