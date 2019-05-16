@@ -67,19 +67,21 @@ void IYamlReaderImpl::setOutputStream( std::ostream *strm )
 	ostream = strm;
 }
 
-void IYamlReaderImpl::readTarball()
+void IYamlReaderImpl::readTarball(bool quiet)
 {
 	if ( ostream ) {
-		readTarball( ostream );
+		readTarball( ostream, quiet );
 	} else {
     	RAIIFile file( outputFile, std::ios_base::out | std::ios_base::binary );
-		readTarball( file.f() );
+		readTarball( file.f(), quiet );
 	}
 }
 
-void IYamlReaderImpl::readTarball(std::ostream *fp)
+void IYamlReaderImpl::readTarball(std::ostream *fp, bool quiet)
 {
-    printf( "Starting reading of the tarball file from the PROM...\n" );
+	if ( ! quiet ) {
+		printf( "Starting reading of the tarball file from the PROM...\n" );
+	}
     try
     {
         std::vector<uint32_t> raw_data(mem_block_size, 0);
@@ -148,11 +150,13 @@ void IYamlReaderImpl::readTarball(std::ostream *fp)
 
             endAddress = addr;
 
-            printf( "A valid tarball was found:\n" );
-            printf( "   Start address     : 0x%08X\n",   startAddress );
-            printf( "   End address       : 0x%08X\n",   endAddress   );
-            printf( "   Tarball file size : %d bytes\n", endAddress - startAddress  );
-            printf( "The tarball was written to %s\n",   outputFile.c_str() );
+			if ( ! quiet ) {
+				printf( "A valid tarball was found:\n" );
+				printf( "   Start address     : 0x%08X\n",   startAddress );
+				printf( "   End address       : 0x%08X\n",   endAddress   );
+				printf( "   Tarball file size : %d bytes\n", endAddress - startAddress  );
+				printf( "The tarball was written to %s\n",   outputFile.c_str() );
+			}
             return;
         }
     }
