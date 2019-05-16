@@ -8,14 +8,14 @@
 
 static void usage(const char* name)
 {
-    printf( "Usage: %s [-a ip_addr] [-d out_dir] [-f file_name] -u | -h\n", name );
-    printf( "    -h           : show this message.\n" );
+    printf( "Usage: %s -a ip_addr [-d out_dir] [-f file_name] [-u] | -h\n", name );
+    printf( "    -h           : Show this message.\n" );
     printf( "    -a ip_addr   : IP address of the target FPGA.\n" );
     printf( "    -d out_dir   : Output directory to write the read tarball (Optional. Default to \".\").\n" );
     printf( "    -f file_name : Output file name (Optional. Default: \"yaml.tar.gz\").\n" );
     printf( "    -u           : Untar the tarball in the output directory.\n" );
     printf( "    -s           : Strip the root directory while untaring (Must be used with -u).\n" );
-    printf( "    -v           : Read firmware informatio (Must be used with -u and -s).\n" );
+    printf( "    -v           : Read firmware information (Must be used with -u and -s).\n" );
     printf( "\n" );
 }
 
@@ -43,7 +43,7 @@ int main (int argc, char **argv)
     bool          strip   = false;
     bool          readVer = false;
 
-    while((c =  getopt(argc, argv, "a:d:f:usv")) != -1)
+    while((c =  getopt(argc, argv, "a:d:f:usvh")) != -1)
     {
         switch (c)
         {

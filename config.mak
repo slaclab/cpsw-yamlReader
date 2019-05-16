@@ -34,3 +34,5 @@ CPSW_DIR         = $(PACKAGE_TOP)/cpsw/framework/$(CPSW_VERSION)/$(TARCH)
 BOOST_DIR        = $(PACKAGE_TOP)/boost/$(BOOST_VERSION)/$(TARCH)
 YAML_CPP_DIR     = $(PACKAGE_TOP)/yaml-cpp/$(YAML_CPP_VERSION)/$(TARCH)
 DEVICELIB_DIR    = $(PACKAGE_TOP)/cpsw/deviceLibrary/$(CPSW_DEVICELIB_VERSION)/$(TARCH)
+
+-include config.local.mak

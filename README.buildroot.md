@@ -5,5 +5,5 @@
 This driver is crosscompiled against the buildroot versions listed in the variable **BR_ARCHES**,
 which is defined in the file **config.mak**.
 
-The driver is compile also for the host architecture, which is defined in the **HARCH** in the
+The driver is compiled also for the host architecture, which is defined in the **HARCH** in the
 same file.
