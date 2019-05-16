@@ -29,8 +29,8 @@ public:
     virtual void           setOutputDir( const std::string& dir );
     virtual void           setFileName(  const std::string& name );
 
-    virtual void           readTarball(bool quiet = 0);
-	virtual void           readTarball(std::ostream *, bool quiet = 0);
+    virtual void           readTarball(int verb);
+	virtual void           readTarball(std::ostream *, int verb);
     virtual void           untar( const bool stripRootDir = false ) const;
 
 	// stream where to dump data -- is *not* closed by this library

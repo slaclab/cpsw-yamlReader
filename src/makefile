@@ -71,11 +71,6 @@ VPATH+=$(SRCDIR)/test
 
 readYaml_SRCS    += readYaml.cc
 
-#myProg_SRCS      += mySrc3.cc
-
-#myTest_SRCS      += mySrc4.cc
-#myOtherTest_SRCS += mySrc5.cc
-
 # Identify directories where to look for headers:
 INCLUDE_DIRS      += $(DEVICELIB_DIR)/include
 

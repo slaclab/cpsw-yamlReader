@@ -5,6 +5,7 @@
 #include <yaml-cpp/yaml.h>
 #include <cpsw_api_user.h>
 #include <yamlReader_api.h>
+#include <iostream>
 
 static void usage(const char* name)
 {
@@ -13,6 +14,7 @@ static void usage(const char* name)
     printf( "    -a ip_addr   : IP address of the target FPGA.\n" );
     printf( "    -d out_dir   : Output directory to write the read tarball (Optional. Default to \".\").\n" );
     printf( "    -f file_name : Output file name (Optional. Default: \"yaml.tar.gz\").\n" );
+    printf( "                 : '-' reads to 'stdout' but none of 'u', 's', 'v' may be used.\n");
     printf( "    -u           : Untar the tarball in the output directory.\n" );
     printf( "    -s           : Strip the root directory while untaring (Must be used with -u).\n" );
     printf( "    -v           : Read firmware information (Must be used with -u and -s).\n" );
@@ -39,9 +41,10 @@ int main (int argc, char **argv)
     std::string   outDir;
     std::string   fileName;
     int           c;
-    bool          untar   = false;
-    bool          strip   = false;
-    bool          readVer = false;
+    bool          untar     = false;
+    bool          strip     = false;
+    bool          readVer   = false;
+	bool          useStdout = false;
 
     while((c =  getopt(argc, argv, "a:d:f:usvh")) != -1)
     {
@@ -60,7 +63,11 @@ int main (int argc, char **argv)
                 outDir= std::string(optarg);
                 break;
             case 'f':
-                fileName = std::string(optarg);
+				if ( 0 == strcmp("-", optarg) ) {
+					useStdout = true;
+				} else {
+                	fileName  = std::string(optarg);
+				}
                 break;
             case 'u':
                 untar = true;
@@ -85,6 +92,12 @@ int main (int argc, char **argv)
     }
 
     YamlReader tr = IYamlReader::create( ipAddr );
+
+	if ( useStdout ) {
+		// payload to stdout, messages to stderr
+		tr->readTarball( &std::cout, YAML_READER_TO_STDERR );
+		return 0;
+	}
 
     if ( !fileName.empty() )
         tr->setFileName( fileName );

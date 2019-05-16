@@ -67,20 +67,21 @@ void IYamlReaderImpl::setOutputStream( std::ostream *strm )
 	ostream = strm;
 }
 
-void IYamlReaderImpl::readTarball(bool quiet)
+void IYamlReaderImpl::readTarball(int verb)
 {
 	if ( ostream ) {
-		readTarball( ostream, quiet );
+		readTarball( ostream, verb );
 	} else {
     	RAIIFile file( outputFile, std::ios_base::out | std::ios_base::binary );
-		readTarball( file.f(), quiet );
+		readTarball( file.f(), verb );
 	}
 }
 
-void IYamlReaderImpl::readTarball(std::ostream *fp, bool quiet)
+void IYamlReaderImpl::readTarball(std::ostream *fp, int verb)
 {
-	if ( ! quiet ) {
-		printf( "Starting reading of the tarball file from the PROM...\n" );
+	if ( verb != YAML_READER_QUIET ) {
+		FILE *f = YAML_READER_TO_STDERR == verb ?  ::stderr : ::stdout;
+		fprintf( f, "Starting reading of the tarball file from the PROM...\n" );
 	}
     try
     {
@@ -150,12 +151,13 @@ void IYamlReaderImpl::readTarball(std::ostream *fp, bool quiet)
 
             endAddress = addr;
 
-			if ( ! quiet ) {
-				printf( "A valid tarball was found:\n" );
-				printf( "   Start address     : 0x%08X\n",   startAddress );
-				printf( "   End address       : 0x%08X\n",   endAddress   );
-				printf( "   Tarball file size : %d bytes\n", endAddress - startAddress  );
-				printf( "The tarball was written to %s\n",   outputFile.c_str() );
+			if ( verb != YAML_READER_QUIET ) {
+				FILE *f = YAML_READER_TO_STDERR == verb ?  ::stderr : ::stdout;
+				fprintf( f, "A valid tarball was found:\n" );
+				fprintf( f, "   Start address     : 0x%08X\n",   startAddress );
+				fprintf( f, "   End address       : 0x%08X\n",   endAddress   );
+				fprintf( f, "   Tarball file size : %d bytes\n", endAddress - startAddress  );
+				fprintf( f, "The tarball was written to %s\n",   outputFile.c_str() );
 			}
             return;
         }
@@ -171,6 +173,10 @@ void IYamlReaderImpl::untar( const bool stripRootDir ) const
 {
 int status;
 
+	if ( outputFile.empty() ) {
+		throw CPSWError("Unable to untar without a file name");
+	}
+
     std::string cmd = "tar -zxf " + outputFile + " -C " + dirName;
 
     if ( stripRootDir )
@@ -178,7 +184,7 @@ int status;
 
     if ( (status = system( cmd.c_str() )) ) {
 		fprintf(stderr,"system(\"%s\") FAILED -- return status %i\n", cmd.c_str(), status);
-		exit( status );
+		throw IOError("system(\"tar -zxf\") failed");
 	}
 
     printf( "The tarball was ungziped and untared on %s\n",  dirName.c_str() );
