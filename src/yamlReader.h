@@ -4,7 +4,6 @@
 #include <stdexcept>
 #include <cstdlib>
 #include <iterator>
-#include <boost/make_shared.hpp>
 #include <PromApiUser.h>
 #include <AxiMicronN25Q.h>
 #include <cpsw_api_builder.h>

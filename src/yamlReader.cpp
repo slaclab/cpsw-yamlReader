@@ -1,5 +1,7 @@
 #include <yamlReader.h>
 #include <iostream>
+#include <algorithm>
+#include <functional>
 
 static Hub buildHier(const char *ip_addr)
 {
@@ -221,5 +223,5 @@ void IYamlReaderImpl::copyWord( const uint32_t& u32, std::ostream* file, bool tr
 
 YamlReader IYamlReader::create( const std::string& ipAddr )
 {
-    return YamlReader( boost::make_shared<IYamlReaderImpl>( ipAddr ) );
+    return YamlReader( cpsw::make_shared<IYamlReaderImpl>( ipAddr ) );
 }

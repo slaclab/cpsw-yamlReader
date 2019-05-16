@@ -4,12 +4,11 @@
 #include <string>
 #include <inttypes.h>
 #include <stdexcept>
-#include <boost/shared_ptr.hpp>
 #include <cpsw_shared_ptr.h>
 
 class IYamlReader;
 
-typedef boost::shared_ptr<IYamlReader> YamlReader;
+typedef cpsw::shared_ptr<IYamlReader> YamlReader;
 
 #define YAML_READER_TO_STDOUT  0
 #define YAML_READER_TO_STDERR  1
