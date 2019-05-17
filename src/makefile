@@ -11,7 +11,7 @@
 
 # Locate CPSW:
 ifndef TOPDIR
-TOPDIR=.
+TOPDIR=..
 endif
 
 # Note: must include from $(SRCDIR) (which is redefined
