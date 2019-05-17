@@ -24,6 +24,12 @@ By default, the destination folder is the current directory and the file name is
 The method **readTarball** reads the YAML tarball from the PROM into the destination file. Initially, the first 2 bytes read are check to
 verify if the PROM area contains a valid GZ file header (*0x1F8B*). If not, the reading is aborted.
 
+Note, however, that no internal pipline is supported, i.e., unzip/untar is not available when not using an explicit file.
+
+#### Reading into a `std::ostream`
+The reader supports reading into a user-provided stream (such as std::cout). The messages that are normally printed to the console
+can be suppressed or redirected to stderr.
+
 ### Untar the resulting file.
 
 The method **untar** provides a way to untar the resulting YAML tarball file. It takes a bool argument, if set to true the root directory
