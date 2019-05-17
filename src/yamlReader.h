@@ -10,6 +10,7 @@
 #include <cpsw_api_user.h>
 #include <RAIIFile.h>
 #include <yamlReader_api.h>
+#include <stdarg.h>
 
 static const size_t mem_block_size      = 64;                             // Number of memory block
 static const size_t mem_byte_size       = 4;                              // Size in bytes of each memory location
@@ -18,7 +19,7 @@ static const size_t mem_block_byte_size = mem_block_size * mem_byte_size; // Siz
 class IYamlReaderImpl : public IYamlReader
 {
 public:
-    IYamlReaderImpl( const std::string& ipAddr );
+    IYamlReaderImpl( const std::string& ipAddr, int verb );
     virtual ~IYamlReaderImpl() {};
 
     virtual const uint32_t getStartAddress() const { return startAddress;                };
@@ -35,6 +36,8 @@ public:
 	// stream where to dump data -- is *not* closed by this library
 	virtual void           setOutputStream(std::ostream *);
 
+	virtual void           chat(int verbosity, const char *fmt, ...) const;
+
 private:
     std::string dirName;
     std::string fileName;
@@ -42,6 +45,7 @@ private:
     EEProm      prom;
     uint32_t    startAddress;
     uint32_t    endAddress;
+	int         dfltVerbosity;
 
 	std::ostream *ostream;
 

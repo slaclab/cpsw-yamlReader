@@ -91,11 +91,11 @@ int main (int argc, char **argv)
         exit(1);
     }
 
-    YamlReader tr = IYamlReader::create( ipAddr );
+    YamlReader tr = IYamlReader::create( ipAddr, useStdout ? YAML_READER_TO_STDERR : YAML_READER_TO_STDOUT );
 
 	if ( useStdout ) {
 		// payload to stdout, messages to stderr
-		tr->readTarball( &std::cout, YAML_READER_TO_STDERR );
+		tr->readTarball( &std::cout );
 		return 0;
 	}
 
@@ -104,6 +104,8 @@ int main (int argc, char **argv)
 
     if ( !outDir.empty() )
         tr->setOutputDir( outDir );
+    else
+        outDir = ".";
 
     // Read tarball from PROM
     tr->readTarball();

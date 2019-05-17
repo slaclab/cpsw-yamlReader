@@ -1,7 +1,6 @@
 #include <yamlReader.h>
 #include <iostream>
 #include <algorithm>
-#include <functional>
 
 static Hub buildHier(const char *ip_addr)
 {
@@ -22,13 +21,18 @@ static Hub buildHier(const char *ip_addr)
     return commDev;
 }
 
-IYamlReaderImpl::IYamlReaderImpl( const std::string& ipAddr )
+IYamlReaderImpl::IYamlReaderImpl( const std::string& ipAddr, int verbosity )
 :
     dirName( "." ),
     fileName( "yaml.tar.gz" ),
     outputFile( dirName + "/" + fileName ),
-	ostream( NULL )
+    dfltVerbosity( verbosity ),
+    ostream( NULL )
 {
+    if ( dfltVerbosity < YAML_READER_TO_STDOUT || dfltVerbosity > YAML_READER_TO_STDERR )
+    {
+        dfltVerbosity = YAML_READER_TO_STDOUT;
+    }
     try
     {
         Hub root               = buildHier( ipAddr.c_str() );
@@ -37,7 +41,7 @@ IYamlReaderImpl::IYamlReaderImpl( const std::string& ipAddr )
 
         tarballAddr->getVal(&startAddress);
 
-        printf( "Tarball start address found: 0x%08X\n", startAddress );
+        chat( dfltVerbosity, "Tarball start address found: 0x%08X\n", startAddress );
     }
     catch (CPSWError e)
     {
@@ -55,36 +59,61 @@ void IYamlReaderImpl::setOutputDir( const std::string& dir )
 void IYamlReaderImpl::setFileName(  const std::string& name )
 {
     fileName = name;
-	if ( fileName.empty() ) {
-		outputFile.clear();
-		ostream = &std::cout;
-	} else {
-    	outputFile = dirName + "/" + fileName;
-		ostream = NULL;
-	}
+    if ( fileName.empty() )
+    {
+        outputFile.clear();
+        ostream = &std::cout;
+    }
+    else
+    {
+        outputFile = dirName + "/" + fileName;
+        ostream = NULL;
+    }
 }
 
 void IYamlReaderImpl::setOutputStream( std::ostream *strm )
 {
-	ostream = strm;
+    ostream = strm;
+}
+
+void IYamlReaderImpl::chat(int verbosity, const char *fmt, ...) const
+{
+va_list ap;
+
+    va_start(ap, fmt);
+
+    if ( YAML_READER_DFLT_VERB == verbosity )
+    {
+        verbosity = dfltVerbosity;
+    }
+
+    if ( verbosity != YAML_READER_QUIET )
+    {
+        FILE *f = YAML_READER_TO_STDERR == verbosity ?  ::stderr : ::stdout;
+    
+        vfprintf(f, fmt, ap);
+    }
+
+    va_end(ap);
 }
 
 void IYamlReaderImpl::readTarball(int verb)
 {
-	if ( ostream ) {
-		readTarball( ostream, verb );
-	} else {
-    	RAIIFile file( outputFile, std::ios_base::out | std::ios_base::binary );
-		readTarball( file.f(), verb );
-	}
+    if ( ostream )
+    {
+        readTarball( ostream, verb );
+    }
+    else
+    {
+        RAIIFile file( outputFile, std::ios_base::out | std::ios_base::binary );
+        readTarball( file.f(), verb );
+   		chat( verb, "The tarball was written to %s\n",   outputFile.c_str() );
+    }
 }
 
 void IYamlReaderImpl::readTarball(std::ostream *fp, int verb)
 {
-	if ( verb != YAML_READER_QUIET ) {
-		FILE *f = YAML_READER_TO_STDERR == verb ?  ::stderr : ::stdout;
-		fprintf( f, "Starting reading of the tarball file from the PROM...\n" );
-	}
+    chat( verb, "Starting reading of the tarball file from the PROM...\n" );
     try
     {
         std::vector<uint32_t> raw_data(mem_block_size, 0);
@@ -136,7 +165,12 @@ void IYamlReaderImpl::readTarball(std::ostream *fp, int verb)
 
                 // Make a copy of the last word od the block, and copy all the rest the output file.
                 tail_val = *(it-1);
-                for_each(raw_data.begin(), it-1, std::bind(&IYamlReaderImpl::copyWord, this, std::placeholders::_1, fp, false ));
+                for (std::vector<uint32_t>::const_iterator k = raw_data.begin();
+                     k != it-1;
+                     ++k)
+                {
+                    copyWord( *k, fp, false );
+                }
 
                 // If the marker was not found in this block, continue reading a new block.
                 if (it == raw_data.end())
@@ -153,14 +187,10 @@ void IYamlReaderImpl::readTarball(std::ostream *fp, int verb)
 
             endAddress = addr;
 
-			if ( verb != YAML_READER_QUIET ) {
-				FILE *f = YAML_READER_TO_STDERR == verb ?  ::stderr : ::stdout;
-				fprintf( f, "A valid tarball was found:\n" );
-				fprintf( f, "   Start address     : 0x%08X\n",   startAddress );
-				fprintf( f, "   End address       : 0x%08X\n",   endAddress   );
-				fprintf( f, "   Tarball file size : %d bytes\n", endAddress - startAddress  );
-				fprintf( f, "The tarball was written to %s\n",   outputFile.c_str() );
-			}
+    		chat( verb, "A valid tarball was found:\n" );
+    		chat( verb, "   Start address     : 0x%08X\n",   startAddress );
+    		chat( verb, "   End address       : 0x%08X\n",   endAddress   );
+    		chat( verb, "   Tarball file size : %d bytes\n", endAddress - startAddress  );
             return;
         }
     }
@@ -175,24 +205,25 @@ void IYamlReaderImpl::untar( const bool stripRootDir ) const
 {
 int status;
 
-	if ( outputFile.empty() ) {
-		throw CPSWError("Unable to untar without a file name");
-	}
+    if ( outputFile.empty() ) {
+    	throw CPSWError("Unable to untar without a file name");
+    }
 
     std::string cmd = "tar -zxf " + outputFile + " -C " + dirName;
 
     if ( stripRootDir )
         cmd += " --strip-components=1";
 
-    if ( (status = system( cmd.c_str() )) ) {
-		fprintf(stderr,"system(\"%s\") FAILED -- return status %i\n", cmd.c_str(), status);
-		throw IOError("system(\"tar -zxf\") failed");
-	}
+    if ( (status = system( cmd.c_str() )) )
+    {
+    	fprintf(stderr,"system(\"%s\") FAILED -- return status %i\n", cmd.c_str(), status);
+    	throw IOError("system(\"tar -zxf\") failed");
+    }
 
-    printf( "The tarball was ungziped and untared on %s\n",  dirName.c_str() );
+    chat( dfltVerbosity, "The tarball was ungziped and untared on %s\n",  dirName.c_str() );
 
     if ( stripRootDir )
-        printf( "The root directory in the tarball was stripped\n" );
+        chat( dfltVerbosity, "The root directory in the tarball was stripped\n" );
 
 }
 
@@ -221,7 +252,7 @@ void IYamlReaderImpl::copyWord( const uint32_t& u32, std::ostream* file, bool tr
     std::copy(u8.begin(), u8.end(), std::ostream_iterator<uint8_t>(*file));
 }
 
-YamlReader IYamlReader::create( const std::string& ipAddr )
+YamlReader IYamlReader::create( const std::string& ipAddr, int verb )
 {
-    return YamlReader( cpsw::make_shared<IYamlReaderImpl>( ipAddr ) );
+    return YamlReader( cpsw::make_shared<IYamlReaderImpl>( ipAddr, verb ) );
 }
