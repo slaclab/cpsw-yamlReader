@@ -6,6 +6,11 @@ Release notes for the yamlReader Driver.
 
   * Support reading to an arbitrary std::ostream
     (no unzip/untar support, though).
+  * Support silencing or redirecting the messages that 
+    are normally printed (necessary if you want to 
+    read the yaml to stdout).
+  * Port to the latest CPSW.
+  * Use the standard CPSW makefiles.
 
 * __R1.0.3__: 2019-02-06 J. Vasquez
   * Bug Fix: Update yaml-cpp to the correct verion 
