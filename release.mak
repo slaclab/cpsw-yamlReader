@@ -1,8 +1,8 @@
 ########################
 ### Package versions ###
 ########################
-CPSW_VERSION           = master
-CPSW_DEVICELIB_VERSION = master
+CPSW_VERSION           = R4.1.0
+CPSW_DEVICELIB_VERSION = R1.0.2
 
 # Package top
 PACKAGE_TOP      = /afs/slac/g/lcls/package
