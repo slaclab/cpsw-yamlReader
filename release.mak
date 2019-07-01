@@ -1,7 +1,7 @@
 ########################
 ### Package versions ###
 ########################
-CPSW_VERSION           = R4.1.0
+CPSW_VERSION           = R4.1.1
 CPSW_DEVICELIB_VERSION = R1.1.0
 
 # Package top
