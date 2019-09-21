@@ -3,6 +3,9 @@
 Release notes for the yamlReader Driver.
 
 ## Releases:
+* __R1.1.1__: 2019-09-20 Kukhee Kim
+  * build with cpsw/framework R4.2.0 and cpsw/DeviceLibrary R1.1.1
+
 * __R1.1.0__: 2019-06-26 Kukhee Kim
   * build with cpsw/framework R4.1.2 and cpsw/deviceLibrary R1.1.0
   * Support reading to an arbitrary std::ostream
