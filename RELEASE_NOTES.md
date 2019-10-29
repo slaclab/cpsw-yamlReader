@@ -3,6 +3,8 @@
 Release notes for the yamlReader Driver.
 
 ## Releases:
+* __R1.1.2__: 2019-10-28 Kukhee Kim
+  * build with cpsw/framework R4.3.1 and cpsw/deviceLibrary R1.1.2
 * __R1.1.1__: 2019-09-20 Kukhee Kim
   * build with cpsw/framework R4.2.0 and cpsw/DeviceLibrary R1.1.1
 
