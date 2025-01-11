@@ -3,6 +3,10 @@
 Release notes for the yamlReader Driver.
 
 ## Releases:
+* __R1.2.2__: 2025-01-10 J. Lorelli
+  * Update CPSW to R4.5.2
+  * Update deviceLibrary to R1.2.2
+
 * __R1.2.1__: 2024-10-30 J. Lorelli
   * Update PACKAGE_TOP handling to be more flexible
   * Update deviceLibrary to R1.2.1
